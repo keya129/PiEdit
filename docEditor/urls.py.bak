@@ -1,0 +1,10 @@
+from django.conf.urls import url
+
+from . import views
+
+urlpatterns = [
+	# editor post
+	url(r'^editor/$', views.EditorView.as_view()),
+	# editor put
+	url(r'^editor/(?P<pk>[0-9]+)/$', views.EditorView.as_view()),
+]

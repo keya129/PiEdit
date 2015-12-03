@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src = "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+  <title>Document</title>
+ </head>
+ <body ng-app="editor">
+	 <div ng-controller="EditorDataController">
+		 <form method="post">{% csrf_token %}
+			<input type="text" value ="{{editor.id}}" name="editorId" hidden>
+			<div class="text-area-container">
+				<textarea name="editorText" class="editorText" id="editorText" rows="50" cols="200" ng-model="editorTextModel">
+				
+				</textarea>
+			</div>
+		</form>	
+	</div>
+	<div>
+		{{editorTextModel}}
+	</div>
+<script>
+	var editorModule = angular.module('editor', []);
+
+editorModule.controller('EditorDataController', function ($scope, $http, $interval) {
+	$interval(callAtInterval, 1000);
+
+    $scope.editorTextModel = "";
+
+    $scope.$watch(function () {
+        return $scope.editorTextModel;
+    },
+    function (newValue, oldValue) {
+        
+        if(newValue == oldValue){return;}
+        $http({
+			method: 'POST',
+			url: '/docEditor/getEditor/',
+			data: {"editorText":newValue},
+			headers: {'Content-Type': 'application/json'}
+		}).success(function(response){
+			$scope.editorTextModel = response.editor;
+		});
+    }, true);
+
+	function callAtInterval() {
+		$http({
+			method: 'GET',
+			url: '/docEditor/editor/1/',
+			headers: {'Content-Type': 'application/json'}
+		}).success(function(response){
+			$scope.editorTextModel = response.editor;
+		});
+	}
+});
+
+editorModule.config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token|escapejs}}';
+  }]);
+
+</script>
+</body>
+</html>

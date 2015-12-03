@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src = "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+  <title>Document</title>
+ </head>
+	<body>
+		<input type="text" value ="{{editor.id}}" name="editorId" id="editorId" hidden>
+		<div ng-app="App" id="page-wrapper" ng-controller="contentController">
+			<div contenteditable="true" ng-model="text01">
+		</div>
+	</div>
+<script>
+var app = angular.module("App", []);
+app.controller('contentController', ['$scope', function($scope, $http) {
+	$scope.text01 = 'Click here to edit the text.';
+	$scope.$watch(function () {
+		return $scope.text01;
+		},
+		function (newValue, oldValue) {
+			if(newValue == oldValue){return;}
+			newValueArray = newValue.split('<br>');
+			oldValueArray = oldValue.split('<br>');
+			console.log("oldValueArray--"+oldValueArray);
+			console.log("newValueArray--"+newValueArray);
+			var changedValue="";
+			var lineNumber="";
+			angular.forEach(newValueArray,function(value,index){
+				if(index < oldValueArray.length)
+				{
+					if(newValueArray[index] != oldValueArray[index]){
+						console.log("uper");
+						changedValue = newValueArray[index];
+						lineNumber = index + 1;
+					}
+				}else if(index == oldValueArray.length){
+					console.log("niche");
+					changedValue = newValueArray[index];
+					lineNumber = index + 1;
+				}
+			});
+			if(changedValue!="" && lineNumber!=""){
+				 $http({
+					method: 'POST',
+					url: '/docEditor/getEditor/',
+					data: {"editorId":$("#editorId").val(),"lineNumber":lineNumber,"editorText":changedValue},
+					headers: {'Content-Type': 'application/json'}
+				}).success(function(response){
+					$scope.editorTextModel = response.editor;
+				});
+			}
+		}, true);
+	}]);
+
+app.directive("contenteditable", function() {
+  return {
+    require: "ngModel",
+    link: function(scope, element, attrs, ngModel) {
+
+      function read() {
+        ngModel.$setViewValue(element.html());
+      }
+
+      ngModel.$render = function() {
+        element.html(ngModel.$viewValue || "");
+      };
+
+      element.bind("blur keyup change", function() {
+        scope.$apply(read);
+      });
+    }
+  };
+});
+
+app.config(['$httpProvider', function($httpProvider) {
+        $httpProvider.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token|escapejs}}';
+  }]);
+</script>
+  </body>
+</html>

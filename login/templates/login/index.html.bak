@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html >
+  <head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+
+
+    <script type="text/javascript" language="javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js">
+</script>
+<script type="text/javascript" language="javascript">
+
+$j = jQuery.noConflict();
+
+</script>
+<script type="text/javascript" language="javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min.js">
+</script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js">
+</script>
+ <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js">
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'login/css/bootstrap.css' %}" />
+
+<link rel="stylesheet" type="text/css" href="{% static 'login/css/style.css' %}" />
+
+   
+
+  </head>
+
+  <body>
+
+
+  <div class="container">
+
+    <div class="row">
+
+      <form action="/login/results/{{eid}}/" method="post" class="form form--login  col-xs-offset-0 col-md-offset-4 col-xs-12 col-md-5">
+    {% csrf_token %}
+            <div class="form__field">
+
+<span class="error">{{msg}}</span>
+</div>
+        <div class="form__field">
+          <label class="fontawesome-user" for="login__username"><span class="hidden">Username</span></label>
+          <input id="login__username" type="text" class="form__input" placeholder="Username" required name="USERNAME">
+        </div>
+
+        <div class="form__field">
+          <label class="fontawesome-lock" for="login__password"><span class="hidden">Password</span></label>
+          <input id="login__password" type="password" class="form__input" placeholder="Password" required name="PASSWORD">
+        </div>
+
+        <div class="form__field">
+          <input type="submit" value="Sign In">
+        </div>
+
+      </form>
+
+
+    </div>
+<div class="signupbottom row "><p class="text--center col-xs-offset-0 col-md-offset-4 col-md-5">Not a member? <a href="/login/register/">Sign up now</a> <span class="fontawesome-arrow-right"></span></p></div>
+
+  </div>
+
+
+
+
+
+
+  </body>
+</html>

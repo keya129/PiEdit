@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="Generator" content="EditPlus®">
+  <meta name="Author" content="">
+  <meta name="Keywords" content="">
+  <meta name="Description" content="">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+  <script src = "http://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+  <script src="script.js"></script>
+  <title>Document</title>
+ </head>
+ <body ng-app="editor">
+	 <div ng-controller="EditorDataController">
+		 <form method="post" name="myForm">
+			<div class="text-area-container">
+				 <div contenteditable name="myWidget" ng-model="userContent" strip-br="true">Change me!</div>
+			</div>
+		</form>	
+	</div>
+	<div>
+			{{userContent}}
+			</div>
+<script>
+	var editorModule = angular.module('editor', []);
+	editorModule.controller('EditorDataController', function ($scope, $http, $interval){
+		$scope.$watch(function () {
+			return $scope.userContent;
+		},
+		function (newValue, oldValue) {
+			if(newValue == oldValue){return;}
+			alert(newValue);
+			/*angular.forEach(newValue,function(value,index){
+				if(oldValue==undefined || newValue[index] != oldValue[index]){
+					alert(newValue[index]);
+				}
+			});*/
+		}, true);
+	});
+</script>
+</body>
+</html>

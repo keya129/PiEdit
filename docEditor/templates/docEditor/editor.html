@@ -1,0 +1,204 @@
+<input type="text" value ="{{editorId}}"  name="editorId" id="editorId" hidden>
+<input type="text" value ={{request.session.username}} name="username" id="username" hidden>
+<input type="text" value="{{editor}}" name="eData" id="eData" hidden>
+<div class="">
+		<div class="col-md-3 pull-right">
+<h3>Active Users</h3>
+    <ul id="activeusers">
+            <li>&nbsp;</li>
+        </ul>
+    </div>
+
+        </div>
+<br/>
+<div id="page-wrapper" ng-controller="contentController">
+        
+	<div contenteditable="true" clean-input ng-model="text01" id="editTxt" style="background:white;border:1px solid black; height:500px; overflow:hidden">
+	</div>
+    <br/>
+    <button type="button" class="btn btn-primary" ng-click="saveText()">Save Editor</button>
+    
+    </div>
+<script src="https://autobahn.s3.amazonaws.com/autobahnjs/latest/autobahn.min.jgz"></script>
+<style>
+    body{color:#ffffff}
+    div#editTxt{color:#000000}
+    ul#activeusers li{display: inline;color:green;padding:10px 10px 0 0;font-weight:bold;font-size:14px;}
+    
+</style>
+<script>
+    var dict = []; 
+var cid="pi"+Math.floor((Math.random() * 100) + 1)+"edit";
+var app = angular.module("App", []);
+app.controller('contentController', ['$scope','$http', function($scope, $http) {
+	
+    $scope.text01 = '<div>&nbsp;</div>';
+    if($("#eData").val()!=""){
+    $scope.text01 = $("#eData").val();}
+
+    $scope.saveText = function(){
+	IdNumber = $("#editorId").val();
+	$http({
+				method: 'POST',
+				url: '/docEditor/editorsave/',
+				data: {"username":$("#username").val(),"idnumber":$("#editorId").val(),"textdata":$scope.text01},
+				headers: {'Content-Type': 'application/json'},
+		}).success(function(response){
+				console.log("wow");
+		});
+	}
+	$scope.$watch(function () {
+	return $scope.text01;
+		},
+		function (newValue, oldValue) {
+			if(newValue == oldValue){return;}
+			newValueArray = [];
+			oldValueArray = [];
+			angular.forEach($(newValue),function(value,index){
+				newValueArray[index] = $(value).text(); 
+			})
+			angular.forEach($(oldValue),function(value,index){
+				oldValueArray[index] = $(value).text(); 
+			})
+			var changedValue="";
+			var lineNumber=-1;
+			angular.forEach(newValueArray,function(value,index){
+				if(index < oldValueArray.length)
+				{
+					if(newValueArray[index] != oldValueArray[index]){
+						changedValue = newValueArray[index];
+						lineNumber = index + 1;
+					}
+				}else if(index == oldValueArray.length){
+					changedValue = newValueArray[index];
+					lineNumber = index + 1;
+				}
+			});
+			if(changedValue!="" && lineNumber!=-1){
+				
+					$http({
+						method: 'PUT',
+						url: '/docEditor/editor/'+$("#editorId").val()+'/',
+                        data: {"username":$("#username").val(),"lineNumber":lineNumber,"editorText":changedValue,"textdata":$scope.text01,"clientId":cid},
+						headers: {'Content-Type': 'application/json'}
+					}).success(function(response){
+						$scope.editorTextModel = response.editor;
+					});
+									
+			}
+		}, true);
+    
+    /**add code here**/
+    /* CWhen the page is loaded, run our code. */
+      window.addEventListener("load", function(){
+
+        /* Connection configuration to our WAMP router */
+        var connection = new autobahn.Connection({
+           url: 'ws://10.0.0.7:8080/ws',
+           realm: 'realm1'
+        });
+        connection.onopen = function(session) {
+          console.log("connected!");
+          /* When we receive the 'clientstats' event, run this function */
+          session.subscribe('clientstats', function(args){
+            var stats = args[0];
+            var divLineNumber=0;
+              var str='';
+              var user='';
+              var eid='';
+                  lineNumber=stats.lineNumber;
+                  str=stats.editor;
+                user=stats.user;
+              
+              eid=stats.eid;
+                            rcid=stats.clientId;
+
+                  console.log(stats);
+              var flag=0;
+              $(str).contents().filter(function(){
+    return this.nodeType == 3 // Text node
+}).each(function(){
+    this.data = this.data.replace(/ /g, '\u00a0');
+});
+              					$('div', $('#editTxt')).each(function (index) {
+                                        
+                                    if(eid!=$("#editorId").val() || rcid==cid){
+                            flag=1;
+                        }
+                                });
+              if(eid==$("#editorId").val()){
+                var au=stats.au
+                $('ul#activeusers').empty();
+                for(var i=0;i<au.length;i++){
+                    $('ul#activeusers').append("<li>"+au[i]+"</li>");
+                }
+              }
+
+
+                                          if(flag==0){
+              
+					divLineNumber = $('div', $('#editTxt')).length;
+              console.log("divLineNumebr"+divLineNumber);
+					if(divLineNumber < lineNumber){
+						for(var i=divLineNumber;i<lineNumber;i++)
+						{
+							//$scope.text01 = $scope.text01 + "<div>&nbsp</div>";
+                            $( "<div>&nbsp;</div>" ).appendTo( "#editTxt" );
+                            console.log($('#editTxt').html());
+							//console.log($scope.text01);
+						}
+					}
+					console.log("no of divs "+$('div', $('#editTxt')).length);
+					$('div', $('#editTxt')).each(function (index) {
+						if(index == lineNumber-1){
+                            console.log("print");
+                            console.log("html :"+$(this).html()+"*");
+                            console.log("str :"+str+"*");
+
+							$(this).html(str);
+                            
+
+						}
+                             
+                                            
+					});
+
+                            
+                                          }
+              
+          });
+
+        };
+
+        // Open the WAMP connection with the router.
+        connection.open();
+
+      });
+    
+}]);
+app.directive("contenteditable", function() {
+  return {
+	require: "ngModel",
+	link: function(scope, element, attrs, ngModel) {
+
+	  function read() {
+		ngModel.$setViewValue(element.html());
+	  }
+
+	  ngModel.$render = function() {
+		element.html(ngModel.$viewValue || "");
+	  };
+
+	  element.bind("blur keyup change", function() {
+		scope.$apply(read);
+	  });
+	}
+  };
+});
+    
+
+app.config(['$httpProvider', function($httpProvider) {
+		$httpProvider.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token|escapejs}}';
+ }]);
+   
+</script>
