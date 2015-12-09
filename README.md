@@ -11,6 +11,7 @@ A Editor publishes data on a topic to Crossbar.io client, and the router dispatc
 Using the Publish & Subscribe pattern allows your application editors to distribute information to other editors in real-time.
 
 ##Architectural Diagram
+![picture alt](http://www.sejalgupta.com/marketplace/img/PiEditArchitecture.PNG "Title is optional")
 
 ##See Project Screenshots at:
 
