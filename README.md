@@ -13,8 +13,6 @@ Using the Publish & Subscribe pattern allows your application editors to distrib
 ##Architectural Diagram
 ![picture alt](http://www.sejalgupta.com/marketplace/img/PiEditArchitecture.PNG "Title is optional")
 
-##See Project Screenshots at:
-
 
 
 
